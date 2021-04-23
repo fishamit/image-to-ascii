@@ -1,6 +1,8 @@
 const sharp = require("sharp");
 const fs = require("fs");
 
+const values = ["░", "▒", "▓"];
+
 const init = () => {
   const data = sharp(process.argv[2])
     .raw()
@@ -20,7 +22,7 @@ const create2dArray = rows => {
 
 const toAscii = (e, squareSize) => {
   let output = "";
-  const sensitivity = process.argv[4] || 100;
+  const contrast = process.argv[4] || 0;
   const width = e.info.width;
   const height = e.info.height;
   const arr = create2dArray(height);
@@ -38,10 +40,22 @@ const toAscii = (e, squareSize) => {
   });
 
   const resized = resize(arr, squareSize);
-  for (let y = 0; y < resized.length; y++) {
+  for (let y = 0; y < resized.length - 1; y++) {
     for (let x = 0; x < resized[0].length; x++) {
-      if (resized[y][x] > sensitivity) output += "@";
-      else output += " ";
+      console.log(resized[y][x]);
+      if (resized[y][x] < 255 / 3 - contrast) {
+        console.log("black");
+        output += values[2];
+      } else if (
+        resized[y][x] >= 255 / 3 - contrast &&
+        resized[y][x] <= (255 / 3) * 2 + contrast
+      ) {
+        console.log("grey");
+        output += values[1];
+      } else {
+        console.log("white");
+        output += values[0];
+      }
     }
     output += `
 `;
