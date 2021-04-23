@@ -2,12 +2,12 @@
 
 Command-line image to ascii converter written in node. uses the Sharp library.
 
-# How to run
+## How to run
 
 "node img.js filename.jpg"
 
-# Configuration
+## Configuration
 
-In config.json, specify the following parameters:
--"squareSize": Size n of square (n x n pixels) to be averaged into one ascii character
--"values": An array of grayscale values, from dark to bright.
+In config.json, specify the following key and values:  
+- "squareSize": Size n of square (n x n pixels) to be averaged into one ascii character  
+- "values": An array of grayscale values, from dark to bright.
