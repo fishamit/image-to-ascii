@@ -1,14 +1,12 @@
 const sharp = require("sharp");
 const fs = require("fs");
 
-const values = ["░", "▒", "▓"];
-
-const init = () => {
+const init = config => {
   const data = sharp(process.argv[2])
     .raw()
     .toBuffer({ resolveWithObject: true })
     .then(e => {
-      toAscii(e, process.argv[3] || 50);
+      toAscii(e, config.squareSize, config.values);
     });
 };
 
@@ -20,9 +18,8 @@ const create2dArray = rows => {
   return tmp;
 };
 
-const toAscii = (e, squareSize) => {
+const toAscii = (e, squareSize, values) => {
   let output = "";
-  const contrast = process.argv[4] || 0;
   const width = e.info.width;
   const height = e.info.height;
   const arr = create2dArray(height);
@@ -42,20 +39,7 @@ const toAscii = (e, squareSize) => {
   const resized = resize(arr, squareSize);
   for (let y = 0; y < resized.length - 1; y++) {
     for (let x = 0; x < resized[0].length; x++) {
-      console.log(resized[y][x]);
-      if (resized[y][x] < 255 / 3 - contrast) {
-        console.log("black");
-        output += values[2];
-      } else if (
-        resized[y][x] >= 255 / 3 - contrast &&
-        resized[y][x] <= (255 / 3) * 2 + contrast
-      ) {
-        console.log("grey");
-        output += values[1];
-      } else {
-        console.log("white");
-        output += values[0];
-      }
+      output += values[Math.floor((resized[y][x] * values.length) / 255)];
     }
     output += `
 `;
@@ -94,7 +78,14 @@ const resize = (arr, n) => {
 };
 
 if (!process.argv[2]) {
-  console.log("node img.fs filename squareSize sensitivity");
+  console.log("Filename not specified");
 } else {
-  init();
+  fs.readFile("config.json", "utf8", (error, data) => {
+    if (error) {
+      console.log(error);
+    } else {
+      console.log(JSON.parse(data));
+      init(JSON.parse(data));
+    }
+  });
 }
