@@ -4,6 +4,6 @@
   "toTxt": true,
   "exportOptions": {
     "toPng": true,
-    "toTxt": false
+    "toTxt": true
   }
 }

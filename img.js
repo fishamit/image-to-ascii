@@ -1,23 +1,6 @@
 const sharp = require("sharp");
+const { createCanvas, loadImage } = require("canvas");
 const fs = require("fs");
-const outToImg = require("./outToImg");
-
-const init = (config, filename) => {
-  const data = sharp(filename)
-    .raw()
-    .toBuffer({ resolveWithObject: true })
-    .then(e => {
-      toAscii(e, config.squareSize, config.values, config.exportOptions);
-    });
-};
-
-const create2dArray = rows => {
-  const tmp = [];
-  for (let i = 0; i < rows; i++) {
-    tmp[i] = [];
-  }
-  return tmp;
-};
 
 const toAscii = (e, squareSize, values, exportOptions) => {
   const width = e.info.width;
@@ -42,13 +25,13 @@ const toAscii = (e, squareSize, values, exportOptions) => {
   const finalOutput = getAsciiString(resized, values);
 
   if (exportOptions.toTxt) {
-    fs.writeFile(`${process.argv[2]}.txt`, finalOutput, e => {});
+    fs.writeFile(`output-${process.argv[2]}.txt`, finalOutput, e => {});
   }
 
   if (exportOptions.toPng) {
-    sharp(outToImg(finalOutput, resized[0].length, resized.length)).toFile(
-      `output-${process.argv[2]}`
-    );
+    sharp(
+      getCanvasBuffer(finalOutput, resized[0].length, resized.length)
+    ).toFile(`output-${process.argv[2]}.png`);
   }
 };
 
@@ -97,6 +80,40 @@ const resize = (arr, n) => {
     }
   }
   return resizedArray;
+};
+
+/*Create an image and return buffer for exporting*/
+const getCanvasBuffer = (input, width, height) => {
+  const fontSize = 10;
+  const canvas = createCanvas(
+    fontSize * width + fontSize - 5,
+    fontSize * 1.2 * height - 10
+  );
+  const ctx = canvas.getContext("2d");
+  ctx.font = "10px Consolas";
+  ctx.rect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "white";
+  ctx.fill();
+  ctx.fillStyle = "black";
+  ctx.fillText(input, 0, fontSize);
+  return canvas.toBuffer();
+};
+
+const init = (config, filename) => {
+  sharp(filename)
+    .raw()
+    .toBuffer({ resolveWithObject: true })
+    .then(e => {
+      toAscii(e, config.squareSize, config.values, config.exportOptions);
+    });
+};
+
+const create2dArray = rows => {
+  const tmp = [];
+  for (let i = 0; i < rows; i++) {
+    tmp[i] = [];
+  }
+  return tmp;
 };
 
 if (!process.argv[2]) {
