@@ -23,13 +23,15 @@ const toAscii = (e, squareSize, values) => {
   const width = e.info.width;
   const height = e.info.height;
   const arr = create2dArray(height);
+  const channels = e.info.channels;
+
   arr.forEach((row, index) => {
-    for (let i = 0; i < width * 3; i = i + 3) {
+    for (let i = 0; i < width * channels; i += channels) {
       row.push(
         Math.floor(
-          (e.data[i + width * 3 * index] +
-            e.data[i + width * 3 * index + 1] +
-            e.data[i + width * 3 * index + 2]) /
+          (e.data[i + width * channels * index] +
+            e.data[i + width * channels * index + 1] +
+            e.data[i + width * channels * index + 2]) /
             3
         )
       );
