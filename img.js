@@ -1,5 +1,6 @@
 const sharp = require("sharp");
 const fs = require("fs");
+const outToImg = require("./outToImg");
 
 const init = config => {
   const data = sharp(process.argv[2])
@@ -38,11 +39,11 @@ const toAscii = (e, squareSize, values) => {
   });
 
   const resized = resize(arr, squareSize);
+  const finalOutput = getAsciiString(resized, values);
+  fs.writeFile(`${process.argv[2]}.txt`, finalOutput, e => {});
 
-  fs.writeFile(
-    `${process.argv[2]}.txt`,
-    getAsciiString(resized, values),
-    e => {}
+  sharp(outToImg(finalOutput, resized[0].length, resized.length)).toFile(
+    "output.png"
   );
 };
 
