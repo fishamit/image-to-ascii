@@ -19,7 +19,6 @@ const create2dArray = rows => {
 };
 
 const toAscii = (e, squareSize, values) => {
-  let output = "";
   const width = e.info.width;
   const height = e.info.height;
   const arr = create2dArray(height);
@@ -39,21 +38,32 @@ const toAscii = (e, squareSize, values) => {
   });
 
   const resized = resize(arr, squareSize);
-  for (let y = 0; y < resized.length - 1; y++) {
-    for (let x = 0; x < resized[0].length; x++) {
-      if (resized[y][x] === 255) {
+
+  fs.writeFile(
+    `${process.argv[2]}.txt`,
+    getAsciiString(resized, values),
+    e => {}
+  );
+};
+
+/*maps array of grayscale values to a string of ascii chars based on the 'values' param*/
+const getAsciiString = (input, values) => {
+  let output = "";
+  for (let y = 0; y < input.length - 1; y++) {
+    for (let x = 0; x < input[0].length; x++) {
+      if (input[y][x] === 255) {
         output += values[values.length - 1];
       } else {
-        output += values[Math.floor((resized[y][x] * values.length) / 255)];
+        output += values[Math.floor((input[y][x] * values.length) / 255)];
       }
     }
     output += `
 `;
   }
-
-  fs.writeFile(`${process.argv[2]}.txt`, output, e => {});
+  return output;
 };
 
+/* lowers the resolution by n */
 const resize = (arr, n) => {
   const width = arr[0].length;
   const height = arr.length;
