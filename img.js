@@ -1,24 +1,8 @@
 const sharp = require("sharp");
+const { createCanvas, loadImage } = require("canvas");
 const fs = require("fs");
 
-const init = config => {
-  const data = sharp(process.argv[2])
-    .raw()
-    .toBuffer({ resolveWithObject: true })
-    .then(e => {
-      toAscii(e, config.squareSize, config.values);
-    });
-};
-
-const create2dArray = rows => {
-  const tmp = [];
-  for (let i = 0; i < rows; i++) {
-    tmp[i] = [];
-  }
-  return tmp;
-};
-
-const toAscii = (e, squareSize, values) => {
+const toAscii = (e, squareSize, values, exportOptions) => {
   const width = e.info.width;
   const height = e.info.height;
   const arr = create2dArray(height);
@@ -38,12 +22,17 @@ const toAscii = (e, squareSize, values) => {
   });
 
   const resized = resize(arr, squareSize);
+  const finalOutput = getAsciiString(resized, values);
 
-  fs.writeFile(
-    `${process.argv[2]}.txt`,
-    getAsciiString(resized, values),
-    e => {}
-  );
+  if (exportOptions.toTxt) {
+    fs.writeFile(`output-${process.argv[2]}.txt`, finalOutput, e => {});
+  }
+
+  if (exportOptions.toPng) {
+    sharp(
+      getCanvasBuffer(finalOutput, resized[0].length, resized.length)
+    ).toFile(`output-${process.argv[2]}.png`);
+  }
 };
 
 /*maps array of grayscale values to a string of ascii chars based on the 'values' param*/
@@ -54,7 +43,7 @@ const getAsciiString = (input, values) => {
       if (input[y][x] === 255) {
         output += values[values.length - 1];
       } else {
-        output += values[Math.floor((input[y][x] * values.length) / 255)];
+        output += ` ${values[Math.floor((input[y][x] * values.length) / 255)]}`;
       }
     }
     output += `
@@ -93,6 +82,40 @@ const resize = (arr, n) => {
   return resizedArray;
 };
 
+/*Create an image and return buffer for exporting*/
+const getCanvasBuffer = (input, width, height) => {
+  const fontSize = 10;
+  const canvas = createCanvas(
+    fontSize * width + fontSize - 5,
+    fontSize * 1.2 * height - 10
+  );
+  const ctx = canvas.getContext("2d");
+  ctx.font = "10px Consolas";
+  ctx.rect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "white";
+  ctx.fill();
+  ctx.fillStyle = "black";
+  ctx.fillText(input, 0, fontSize);
+  return canvas.toBuffer();
+};
+
+const init = (config, filename) => {
+  sharp(filename)
+    .raw()
+    .toBuffer({ resolveWithObject: true })
+    .then(e => {
+      toAscii(e, config.squareSize, config.values, config.exportOptions);
+    });
+};
+
+const create2dArray = rows => {
+  const tmp = [];
+  for (let i = 0; i < rows; i++) {
+    tmp[i] = [];
+  }
+  return tmp;
+};
+
 if (!process.argv[2]) {
   console.log("Filename not specified");
 } else {
@@ -100,7 +123,7 @@ if (!process.argv[2]) {
     if (error) {
       console.log(error);
     } else {
-      init(JSON.parse(data));
+      init(JSON.parse(data), process.argv[2]);
     }
   });
 }
