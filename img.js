@@ -2,7 +2,7 @@ const sharp = require("sharp");
 const { createCanvas, loadImage } = require("canvas");
 const fs = require("fs");
 
-const toAscii = (e, squareSize, values, exportOptions) => {
+const toAscii = (e, squareSize, values, exportOptions, filename) => {
   const width = e.info.width;
   const height = e.info.height;
   const arr = create2dArray(height);
@@ -25,13 +25,17 @@ const toAscii = (e, squareSize, values, exportOptions) => {
   const finalOutput = getAsciiString(resized, values);
 
   if (exportOptions.toTxt) {
-    fs.writeFile(`output-${process.argv[2]}.txt`, finalOutput, e => {});
+    fs.writeFile(`output//${filename}.txt`, finalOutput, e => {
+      if (!e) console.log(filename + " exported to txt.");
+    });
   }
 
   if (exportOptions.toPng) {
     sharp(
       getCanvasBuffer(finalOutput, resized[0].length, resized.length)
-    ).toFile(`output-${process.argv[2]}.png`);
+    ).toFile(`output//${filename}.png`, e => {
+      if (!e) console.log(filename + " exported to png.");
+    });
   }
 };
 
@@ -99,12 +103,18 @@ const getCanvasBuffer = (input, width, height) => {
   return canvas.toBuffer();
 };
 
-const init = (config, filename) => {
+const init = (config, filename, shortFilename) => {
   sharp(filename)
     .raw()
     .toBuffer({ resolveWithObject: true })
     .then(e => {
-      toAscii(e, config.squareSize, config.values, config.exportOptions);
+      toAscii(
+        e,
+        config.squareSize,
+        config.values,
+        config.exportOptions,
+        shortFilename
+      );
     });
 };
 
@@ -116,14 +126,32 @@ const create2dArray = rows => {
   return tmp;
 };
 
-if (!process.argv[2]) {
-  console.log("Filename not specified");
-} else {
-  fs.readFile("config.json", "utf8", (error, data) => {
-    if (error) {
-      console.log(error);
-    } else {
-      init(JSON.parse(data), process.argv[2]);
-    }
-  });
-}
+fs.readFile("config.json", "utf8", (error, data) => {
+  if (error) {
+    console.log("Could not read config file.");
+  } else {
+    fs.readdir("input", (error, files) => {
+      if (error) {
+        console.log(
+          "Input folder not found. Add /input folder containing your image files."
+        );
+      } else if (files.length === 0) {
+        console.log("No files to convert.");
+      } else {
+        fs.mkdir("output", e => {
+          files.forEach(file => {
+            const validExtensions = ["jpg", "png"];
+            const filenameArr = file.split(".");
+            if (
+              validExtensions.includes(
+                filenameArr[filenameArr.length - 1].toLowerCase()
+              )
+            ) {
+              init(JSON.parse(data), `./input/${file}`, file);
+            }
+          });
+        });
+      }
+    });
+  }
+});
