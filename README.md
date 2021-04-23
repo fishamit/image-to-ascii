@@ -1,6 +1,6 @@
 # image-to-ascii
 
-Command-line image to ascii converter written in node. uses the Sharp library.
+Command-line image to ascii converter written in node. uses the canvas & sharp libraries.
 
 ## How to run
 
@@ -11,7 +11,7 @@ Command-line image to ascii converter written in node. uses the Sharp library.
 In config.json, specify the following key and values:
 
 - "squareSize": Size n of square (n x n pixels) to be averaged into one ascii character
-- "values": An array of grayscale values, from dark to bright.
+- "values": An array of grayscale values, from dark to bright
 - "exportOptions": an object containing:
   - "toPng": boolean
   - "toTxt": boolean
