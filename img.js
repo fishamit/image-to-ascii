@@ -2,12 +2,12 @@ const sharp = require("sharp");
 const fs = require("fs");
 const outToImg = require("./outToImg");
 
-const init = config => {
-  const data = sharp(process.argv[2])
+const init = (config, filename) => {
+  const data = sharp(filename)
     .raw()
     .toBuffer({ resolveWithObject: true })
     .then(e => {
-      toAscii(e, config.squareSize, config.values);
+      toAscii(e, config.squareSize, config.values, config.exportOptions);
     });
 };
 
@@ -19,7 +19,7 @@ const create2dArray = rows => {
   return tmp;
 };
 
-const toAscii = (e, squareSize, values) => {
+const toAscii = (e, squareSize, values, exportOptions) => {
   const width = e.info.width;
   const height = e.info.height;
   const arr = create2dArray(height);
@@ -40,11 +40,16 @@ const toAscii = (e, squareSize, values) => {
 
   const resized = resize(arr, squareSize);
   const finalOutput = getAsciiString(resized, values);
-  fs.writeFile(`${process.argv[2]}.txt`, finalOutput, e => {});
 
-  sharp(outToImg(finalOutput, resized[0].length, resized.length)).toFile(
-    "output.png"
-  );
+  if (exportOptions.toTxt) {
+    fs.writeFile(`${process.argv[2]}.txt`, finalOutput, e => {});
+  }
+
+  if (exportOptions.toPng) {
+    sharp(outToImg(finalOutput, resized[0].length, resized.length)).toFile(
+      `output-${process.argv[2]}`
+    );
+  }
 };
 
 /*maps array of grayscale values to a string of ascii chars based on the 'values' param*/
@@ -55,7 +60,7 @@ const getAsciiString = (input, values) => {
       if (input[y][x] === 255) {
         output += values[values.length - 1];
       } else {
-        output += values[Math.floor((input[y][x] * values.length) / 255)];
+        output += ` ${values[Math.floor((input[y][x] * values.length) / 255)]}`;
       }
     }
     output += `
@@ -101,7 +106,7 @@ if (!process.argv[2]) {
     if (error) {
       console.log(error);
     } else {
-      init(JSON.parse(data));
+      init(JSON.parse(data), process.argv[2]);
     }
   });
 }
