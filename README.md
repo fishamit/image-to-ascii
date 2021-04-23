@@ -8,6 +8,7 @@ Command-line image to ascii converter written in node. uses the Sharp library.
 
 ## Configuration
 
-In config.json, specify the following key and values:  
-- "squareSize": Size n of square (n x n pixels) to be averaged into one ascii character  
+In config.json, specify the following key and values:
+
+- "squareSize": Size n of square (n x n pixels) to be averaged into one ascii character
 - "values": An array of grayscale values, from dark to bright.

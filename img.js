@@ -39,7 +39,11 @@ const toAscii = (e, squareSize, values) => {
   const resized = resize(arr, squareSize);
   for (let y = 0; y < resized.length - 1; y++) {
     for (let x = 0; x < resized[0].length; x++) {
-      output += values[Math.floor((resized[y][x] * values.length) / 255)];
+      if (resized[y][x] === 255) {
+        output += values[values.length - 1];
+      } else {
+        output += values[Math.floor((resized[y][x] * values.length) / 255)];
+      }
     }
     output += `
 `;
@@ -84,7 +88,6 @@ if (!process.argv[2]) {
     if (error) {
       console.log(error);
     } else {
-      console.log(JSON.parse(data));
       init(JSON.parse(data));
     }
   });
