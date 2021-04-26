@@ -12,7 +12,7 @@ An output folder will be created, containing the exported files.
 In config.json, specify the following key and values:
 
 - "squareSize": Size n of square (n x n pixels) to be averaged (nearest neighbor) into one ascii character
-- "values": An array of ascii chars that map to grayscale values, from dark to bright.
+- "values": A string of ascii chars that map to grayscale values, from dark to bright.
 - "exportOptions": an object containing:
   - "toPng": boolean
   - "toTxt": boolean
@@ -21,7 +21,7 @@ example config file:
 
 ```
 {
-  "values": ["@", "%", "#", "*", "+", "=", "-", ":", ".", " "],
+  "values": "@%#*+=-:. ",
   "squareSize": 5
   "exportOptions": {
     "toPng": true,
