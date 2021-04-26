@@ -111,7 +111,7 @@ const init = (config, filename, shortFilename) => {
       toAscii(
         e,
         config.squareSize,
-        config.values,
+        config.values.split(""),
         config.exportOptions,
         shortFilename
       );

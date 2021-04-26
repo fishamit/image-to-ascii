@@ -1,6 +1,6 @@
 {
-  "values": ["@", "%", "#", "*", "+", "=", "-", ":", ".", " "],
-  "squareSize": 5,
+  "values": "@%#*+=-:. ",
+  "squareSize": 10,
   "exportOptions": {
     "toPng": true,
     "toTxt": true
