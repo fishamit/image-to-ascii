@@ -22,7 +22,7 @@ example config file:
 ```
 {
   "values": "@%#*+=-:. ",
-  "squareSize": 5
+  "squareSize": 5,
   "exportOptions": {
     "toPng": true,
     "toTxt": true
